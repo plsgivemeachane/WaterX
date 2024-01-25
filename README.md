@@ -1,11 +1,12 @@
 
 # 1.Named: Water Hype ( Fast hydration process )
-@___@ I dont know why i named that lol
-Extendsion : water / waterx
-Css support : Yes
-Typescript : No
-Autocomplete : No
-Language: [[The Water language]]
+
+- @___@ I dont know why i named that lol
+- Extendsion : waterx
+- Css support : Yes
+- Typescript : No
+- Autocomplete : No
+- Language: The Water language
 
 # 2. Process
 ## 1.Hydration process (Server_side)
