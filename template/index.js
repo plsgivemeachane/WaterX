@@ -1,12 +1,11 @@
 const express = require("express");
 const fs = require("fs");
 const {
-  parse,
-  complie,
   getPrebuildHTML,
   getPrebuildJS,
   hydrate,
   enableDevMode,
+  buildStatic,
 } = require("./complie");
 const app = express();
 const chalk = require ("chalk")
@@ -15,6 +14,11 @@ const commandLineArgs = process.argv.slice(2);
 if(commandLineArgs[0] == "--dev") {
   console.log(chalk.blue("\t\t ○ Running in development mode ○\n"))
   enableDevMode()
+} else {
+  console.log(chalk.blue("\t\t ○ Running in production mode ○\n"))
+  console.log(chalk.blue("\t\t ○ Building static files... ○\n"))
+
+  buildStatic()
 }
 
 app.use(express.static("public"));
@@ -26,7 +30,7 @@ app.get("/", (req, res) => {
 app.get("/:id", (req, res) => {
   const id = req.params.id;
   // Check if the file exists
-  if (!fs.existsSync(id + ".waterx")) {
+  if (!fs.existsSync("app/" + id + ".waterx")) {
     res.status(404).send("File not found");
     return;
   }

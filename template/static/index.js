@@ -8,7 +8,7 @@ function Increase() {
 var __pre__a = undefined;
 
 //Post script
-setInterval(() => {if(__pre__a != a) {document.getElementById("715fbfb5").innerHTML = a;}__pre__a = a;}, 10);
+setInterval(() => {if(__pre__a != a) {document.getElementById("0ef10e21").innerHTML = a;}__pre__a = a;}, 10);
 
 // Function to initialize the inline worker
 function initializeInlineWorker() {

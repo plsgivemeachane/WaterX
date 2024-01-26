@@ -11,7 +11,7 @@ function enableDevMode() {
 }
 
 function parse(filename) {
-  return fs.readFileSync(filename).toString();
+  return fs.readFileSync("app/" + filename).toString();
 }
 
 function id_gen() {
@@ -126,12 +126,12 @@ function complie(content, filename) {
 
 function hydrate(filename_or_path) {
   if((!prebuildHTML["index.langx"] && !fs.existsSync(`/static/${filename_or_path}.html`)) || devMode) {
-    console.time("Complie")
+    console.time(chalk.green("\t\t ○ Complied"))
     const data = complie(
       parse(filename_or_path + ".waterx"),
       filename_or_path + ".waterx"
     );
-    console.timeEnd("Complie")
+    console.timeEnd(chalk.green("\t\t ○ Complied"))
 
 
 
@@ -189,11 +189,35 @@ const getPrebuildJS = (filename) => {
   return prebuildJS[filename];
 };
 
+const travel = () => {
+  // Cd into the folder
+  // process.chdir(path);
+  for (var file of fs.readdirSync("app")) {
+    if (file.endsWith(".waterx")) {
+      console.log(chalk.yellow(`\t\t ○ Building file ${file} ○`))
+      hydrate(file.split(".")[0]);
+    }
+  }
+  // cd back to the root
+  // process.chdir("..");
+}
+
+const buildStatic = () => {
+  if(!fs.existsSync("static")) {
+    fs.mkdirSync("static");
+  }
+
+  // console.log(process.cwd())
+
+  travel()
+}
+
 module.exports = {
   parse,
   complie,
   hydrate,
   getPrebuildHTML,
   getPrebuildJS,
-  enableDevMode
+  enableDevMode,
+  buildStatic
 };
