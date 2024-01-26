@@ -1,0 +1,12 @@
+// Title:Click test
+
+var a = 0
+
+function Increase() {
+    a++;
+}
+
+<div>
+    <h1>{a}</h1>
+    <button onClick={Increase} >Click me</button>
+</div>
