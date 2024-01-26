@@ -74,6 +74,11 @@ self.addEventListener('fetch', (event) => {
 });
 ```
 
+# 3. Server side static page (Caching client side)
+#hard
+
+_I dont know how but yeah_.
+
 ---
 # 1.Recomplie waterx file to javascript and HTML
 #hard
@@ -100,7 +105,8 @@ List of work todo:
 - [x] Thinking about when to send it (_Hmm_) ✅ 2024-01-25
 - [x] When to populate in client to aim for best performance ✅ 2024-01-25
 - [x] Remove the heck ----- ✅ 2024-01-25
-- [ ] Write Css
+- [x] Write Css
+- [x] Caching using file
 ---
 ### 5. Task that I dont know why I did:>
 - [x] Adding title metadata ✅ 2024-01-25 #normal 
