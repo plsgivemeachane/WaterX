@@ -6,4 +6,4 @@
 - I wanna die
 - Fixing the generator done!
 - Need some more spec in the complie
-- Hmm need to mannually put file into the cloudflare
+- Hmm need to mannually put file into the cloudflare (cdn cloudflare)

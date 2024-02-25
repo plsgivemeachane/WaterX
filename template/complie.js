@@ -10,8 +10,11 @@ function enableDevMode() {
   devMode = true;
 }
 
-function parse(filename) {
-  return fs.readFileSync("app/" + filename).toString();
+function parse(filename, path) {
+  // console.log("parsing: " + filename)
+  var content = fs.readFileSync(path + "/" + filename).toString();
+  // console.log(content)
+  return content;
 }
 
 function id_gen() {
@@ -31,8 +34,10 @@ function split_content(content) {
 }
 
 function complie(content, filename) {
+  // console.log(content)
   var map_comp = {};
   var map_mult = {};
+  if(content.trim() == "") return
   // complie the langx language with is my new language
   // has 2 part. One is for javascript code and one for html splited by -----
   var contents = split_content(content);
@@ -124,16 +129,17 @@ function complie(content, filename) {
   return [htmlPart, full_package, LoadingHTML];
 }
 
-function hydrate(filename_or_path) {
+function hydrate(filename_or_path, path) {
   if((!prebuildHTML["index.langx"] && !fs.existsSync(`/static/${filename_or_path}.html`)) || devMode) {
-    console.time(chalk.green("\t\t ○ Complied"))
+    console.time(chalk.green("\t\t ○ Complied " + filename_or_path))
     const data = complie(
-      parse(filename_or_path + ".waterx"),
+      parse(filename_or_path + ".waterx", path),
       filename_or_path + ".waterx"
     );
-    console.timeEnd(chalk.green("\t\t ○ Complied"))
+    console.timeEnd(chalk.green("\t\t ○ Complied " + filename_or_path))
 
-
+    // console.log(data)
+    if(!data) return
 
     // In Ram complier
     prebuildHTML[filename_or_path + ".waterx"] = data[0];
@@ -189,15 +195,38 @@ const getPrebuildJS = (filename) => {
   return prebuildJS[filename];
 };
 
-const travel = () => {
+const travel = (path = "app")  => {
   // Cd into the folder
   // process.chdir(path);
-  for (var file of fs.readdirSync("app")) {
+  // console.log("PAHRH:" + path)
+  for (var file of fs.readdirSync(path)) {
     if (file.endsWith(".waterx")) {
-      console.log(chalk.yellow(`\t\t ○ Building file ${file} ○`))
-      hydrate(file.split(".")[0]);
+      // process.chdir(path);
+      // console.log(process.cwd())
+      console.log(chalk.yellow(`\t\t ○ Building file ${path}/${file} ○`))
+      hydrate(file.split(".")[0], path);
+      // Reverse by the length of the path when split
+      // process.chdir("../".repeat(path.split("/").length));
+      // process.chdir("../");
+      // console.log(chalk.yellow(`\t\t ○ Builded file ${file} ○ ${process.cwd()}`))
+      continue
+    }
+
+    // check if has a folder and console.log out
+    try {
+      if (fs.lstatSync(path + "/" + file).isDirectory()) {
+        // console.log(chalk.yellow(`\t\t ○ Building folder ${file} ○`))
+        // console.log(path + "/" + file)
+        // process.chdir(path);
+        travel(path + "/" + file);
+        // process.chdir("..");
+      }
+    } catch (error) {
+      console.log(error)
     }
   }
+
+  // console.log("DONE" + process.cwd())
   // cd back to the root
   // process.chdir("..");
 }
