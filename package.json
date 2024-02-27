@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node ./index.js",
-    "create": "node ./generator.js"
+    "create": "node ./generator.js",
+    "test": "echo I am running"
   },
   "bin": {
     "create-waterx-app": "./generator.js"
