@@ -1,7 +1,7 @@
 <html>
   <head>
-    <title>Click test</title>
-    <script>fetch(`/js/index.waterx`)
+    <title>Default</title>
+    <script>fetch(`/js/about.waterx`)
   .then((res) => res.json())
   .then(async (data) => {
     while (prefetch == 0) {
@@ -22,7 +22,7 @@
     document.getElementById("load").style.display = "none";
 });var prefetch = 0;
 
-fetch("/html/index.waterx")
+fetch("/html/about.waterx")
   .then((res) => res.json())
   .then((data) => {
     document.body.innerHTML += data.html;

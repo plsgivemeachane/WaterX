@@ -23,19 +23,45 @@ if(commandLineArgs[0] == "--dev") {
 
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-  res.send(hydrate("index"));
+app.get("/", async (req, res) => {
+  res.send(await hydrate("index", "app"));
 });
 
-app.get("/:id", (req, res) => {
-  const id = req.params.id;
-  // Check if the file exists
-  if (!fs.existsSync("app/" + id + ".waterx")) {
+app.get(/.+/, async (req, res, next) => {
+  if(req.url.includes("html") || req.url.includes("js")) {
+    next();
+
+    return;
+  }
+  // res.send(req.url)
+  if (!fs.existsSync("app/" + req.url + ".waterx")) {
     res.status(404).send("File not found");
     return;
   }
-  res.send(hydrate(id));
-});
+
+  // split out directory
+  // Example : /home/user/app/index
+
+  if(req.url.split("/").length > 1) {
+    const path = req.url.split("/").slice(0, -1).join("/");
+    const file = req.url.split("/").slice(-1)[0];
+    res.send(await hydrate(file, "app" + path));
+
+    return;
+  }
+
+  res.send(hydrate(req.url, "app"));
+})
+
+// app.get("/:id", (req, res) => {
+//   const id = req.params.id;
+//   // Check if the file exists
+//   if (!fs.existsSync("app/" + id + ".waterx")) {
+//     res.status(404).send("File not found");
+//     return;
+//   }
+//   res.send(hydrate(id));
+// });
 
 app.get("/html/:id", (req, res) => {
   res.send({

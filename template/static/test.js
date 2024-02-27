@@ -1,12 +1,15 @@
+import moment from 'moment';
+var lol = moment.now();
+var __pre__lol = undefined;
 
 //Post script
-setInterval(() => {}, 10);
+setInterval(() => {if(__pre__lol != lol) {document.getElementById("e495d980").innerHTML = lol;}__pre__lol = lol;}, 10);
 
 // Function to initialize the inline worker
 function initializeInlineWorker() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("worker.js")
+      .register("/worker.js")
       .then((registration) => {
         // Registration was successful
         console.log("Service Worker registered:", registration);

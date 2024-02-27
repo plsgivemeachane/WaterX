@@ -1,14 +1,8 @@
-// Title:Click test
-
-var a = 0
-
-function Increase() {
-    a++;
-}
+var a = 10;
 var __pre__a = undefined;
 
 //Post script
-setInterval(() => {if(__pre__a != a) {document.getElementById("4c27a31c").innerHTML = a;}__pre__a = a;}, 10);
+setInterval(() => {if(__pre__a != a) {document.getElementById("26b45681").innerHTML = a;}__pre__a = a;}, 10);
 
 // Function to initialize the inline worker
 function initializeInlineWorker() {

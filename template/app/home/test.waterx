@@ -1,1 +1,5 @@
-<div><p>Hello world</p></div>
+import moment from 'moment';
+var lol = moment.now();
+
+
+<div><p>Hello world {lol}</p></div>

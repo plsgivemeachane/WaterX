@@ -1,8 +1,10 @@
 const chalk = require("chalk");
 const fs = require("fs");
+const Webpack = require('webpack');
+const webpackConfig = require('./webpack.config.js'); // Import configuration
 var prebuildHTML = {};
 var prebuildJS = {};
-var prebuildRunScript = {};
+var prebuildRunScript = {}
 var devMode = false;
 
 function enableDevMode() {
@@ -11,8 +13,9 @@ function enableDevMode() {
 }
 
 function parse(filename, path) {
-  // console.log("parsing: " + filename)
-  var content = fs.readFileSync(path + "/" + filename).toString();
+  var abs_path = (path ? path + "/" : "") + filename;
+  // console.log("parsing: " + abs_path, path)
+  var content = fs.readFileSync(abs_path).toString();
   // console.log(content)
   return content;
 }
@@ -129,8 +132,18 @@ function complie(content, filename) {
   return [htmlPart, full_package, LoadingHTML];
 }
 
-function hydrate(filename_or_path, path) {
-  if((!prebuildHTML["index.langx"] && !fs.existsSync(`/static/${filename_or_path}.html`)) || devMode) {
+/**
+ * Asynchronously hydrates the given file or path.
+ *
+ * @param {string} filename_or_path - The name or path of the file to hydrate
+ * @param {string} path - The path to the file
+ * @return {string} The hydrated data from the file
+ */
+async function hydrate(filename_or_path, path) {
+  // console.log(prebuildHTML[filename_or_path])
+  if((!prebuildHTML[filename_or_path + ".waterx"] && !fs.existsSync(`/static/${path}/${filename_or_path}.html`)) || devMode) {
+    // filename_or_path = "app/" + filename_or_path;
+    console.log(chalk.yellow("\t\t ○ Reqest " + filename_or_path + " compiling"));
     console.time(chalk.green("\t\t ○ Complied " + filename_or_path))
     const data = complie(
       parse(filename_or_path + ".waterx", path),
@@ -138,7 +151,7 @@ function hydrate(filename_or_path, path) {
     );
     console.timeEnd(chalk.green("\t\t ○ Complied " + filename_or_path))
 
-    // console.log(data)
+    // console.log(data, filename_or_path)
     if(!data) return
 
     // In Ram complier
@@ -156,11 +169,14 @@ function hydrate(filename_or_path, path) {
     fs.writeFileSync("static/" + filename_or_path + ".html", data[0]);
     fs.writeFileSync("static/" + filename_or_path + ".js", data[1]);
     fs.writeFileSync("static/" + filename_or_path + "-pre.html", data[2]);
+
+    await buildBundle();
     // fs.writeFileSync("static/" + filename_or_path + ".js", data[2]);
 
     return data[2];
   } else {
-    console.log(chalk.green("Using cache content"))
+    // console.log(chalk.green("Using cache content"))
+    console.log(chalk.green("\t\t ○ Reqest /" + path + "/" + filename_or_path + " serve with cache content"));
     if(!prebuildRunScript[filename_or_path + ".waterx"]) {
       return prebuildRunScript[filename_or_path + ".waterx"] = fs.readFileSync("static/" + filename_or_path + "-pre.html").toString();
     } else {
@@ -183,16 +199,24 @@ const getPrebuildHTML = (filename) => {
 };
 
 const getPrebuildJS = (filename) => {
-  if(!prebuildJS[filename]) {
-    if(!fs.existsSync("static/" + filename.split(".")[0] + ".js")) {
-      console.log(chalk.red("Error file not complied JS: static/" + filename.split(".")[0] + ".js"));
-      return "Error file not complied";
-    }
+  // if(!prebuildJS[filename]) {
+  //   if(!fs.existsSync("dist/static/" + filename.split(".")[0] + ".js.js")) {
+  //     console.log(chalk.red("Error file not complied JS: static/" + filename.split(".")[0] + ".js"));
+  //     return "Error file not complied";
+  //   }
 
-    prebuildJS[filename] = fs.readFileSync("static/" + filename.split(".")[0] + ".js").toString();
-  }
+  //   fs.readFileSync("dist/static/" + filename.split(".")[0] + ".js.js").toString();
+  // }
   
-  return prebuildJS[filename];
+  if(!fs.existsSync("dist/static/" + filename.split(".")[0] + ".js.js")) {
+    console.log(chalk.red("Error file not complied JS: static/" + filename.split(".")[0] + ".js"));
+    return "Error file not complied";
+  }
+
+  // console.log("dist/static/" + filename.split(".")[0] + ".js.js")
+  const file_content = fs.readFileSync("dist/static/" + filename.split(".")[0] + ".js.js").toString();
+  // console.log(file_content)
+  return file_content;
 };
 
 const travel = (path = "app")  => {
@@ -201,7 +225,7 @@ const travel = (path = "app")  => {
   // console.log("PAHRH:" + path)
   for (var file of fs.readdirSync(path)) {
     if (file.endsWith(".waterx")) {
-      // process.chdir(path);
+      // process.chdir(path);di
       // console.log(process.cwd())
       console.log(chalk.yellow(`\t\t ○ Building file ${path}/${file} ○`))
       hydrate(file.split(".")[0], path);
@@ -240,6 +264,37 @@ const buildStatic = () => {
 
   travel()
 }
+
+async function buildBundle() {
+  const compiler = Webpack(webpackConfig);
+
+  // Compile asynchronously
+  try {
+    await new Promise((resolve, reject) => {
+      compiler.run((err, stats) => {
+        if (err) {
+          reject(err);
+        } else {
+          // console.log(stats);
+          resolve(stats);
+        }
+      });
+    });
+  } catch (err) {
+    console.error('Webpack build error:', err);
+    // Handle errors gracefully
+  }
+
+  // Access the generated bundle
+  // const outputPath = compiler.outputPath;
+  // const bundle = fs.readFileSync(outputPath + "/bundle.js");
+
+  // // Send bundle to client or store it for later
+  // // ...
+  // // console.log(bundle)
+  // return bundle
+}
+
 
 module.exports = {
   parse,

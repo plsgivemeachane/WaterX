@@ -2,7 +2,7 @@
 function initializeInlineWorker() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker
-      .register("worker.js")
+      .register("/worker.js")
       .then((registration) => {
         // Registration was successful
         console.log("Service Worker registered:", registration);
