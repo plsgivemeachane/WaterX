@@ -22,7 +22,7 @@ const commmon_files = [
     "PostLoadHTML.js",
     "postLoadJavascript.js",
     "workerInit.js",
-
+    "webpack.config.js"
 ]
 
 const cdn = "https://pub-3d17685d6a884313b28a5105af37d0b1.r2.dev/"
