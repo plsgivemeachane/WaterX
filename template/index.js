@@ -28,7 +28,7 @@ app.get("/", async (req, res) => {
 });
 
 app.get(/.+/, async (req, res, next) => {
-  if(req.url.includes("html") || req.url.includes("js")) {
+  if(req.url.includes("html") || req.url.includes("js") || req.url.includes("css")) {
     next();
 
     return;
@@ -74,6 +74,12 @@ app.get("/js/:id", (req, res) => {
     js: getPrebuildJS(req.params.id),
   });
 });
+
+app.get(/.*\.css/, (req, res) => {
+  const path = req.url.split("/").slice(0, -1).join("/");
+  const file = req.url.split("/").slice(-1)[0];
+  res.sendFile(__dirname + "/app/" + path + "/" + file);
+})
 
 app.listen(3000, () => {
   console.log(chalk.green("\t\t ○ Development link:http://localhost:3000 ○"));

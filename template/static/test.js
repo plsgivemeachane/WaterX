@@ -1,9 +1,7 @@
 import moment from 'moment';
-var lol = moment.now();
-var __pre__lol = undefined;
-
+var lol = moment.now();var __pre__lol = undefined;
 //Post script
-setInterval(() => {if(__pre__lol != lol) {document.getElementById("e495d980").innerHTML = lol;}__pre__lol = lol;}, 10);
+setInterval(() => {if(__pre__lol != lol) {document.getElementById("c56e7044").innerHTML = lol;}__pre__lol = lol;}, 10);
 
 // Function to initialize the inline worker
 function initializeInlineWorker() {
@@ -12,7 +10,7 @@ function initializeInlineWorker() {
       .register("/worker.js")
       .then((registration) => {
         // Registration was successful
-        console.log("Service Worker registered:", registration);
+        // console.log("Service Worker registered:", registration);
       })
       .catch((error) => {
         // Registration failed

@@ -1,6 +1,7 @@
 // Title:Click test
 
 var a = 0
+console.log("Loaded")
 
 function Increase() {
     a++;

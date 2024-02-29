@@ -10,7 +10,6 @@ const entry = glob.sync("static/**/*.js")
 
 module.exports = {
   // Entry point for client-side code
-  entry,
 
   // Output configuration
   output: {

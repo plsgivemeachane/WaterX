@@ -5,7 +5,7 @@ function initializeInlineWorker() {
       .register("/worker.js")
       .then((registration) => {
         // Registration was successful
-        console.log("Service Worker registered:", registration);
+        // console.log("Service Worker registered:", registration);
       })
       .catch((error) => {
         // Registration failed

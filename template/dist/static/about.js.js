@@ -1,1 +1,50 @@
-(()=>{var e=void 0;setInterval((function(){10!=e&&(document.getElementById("26b45681").innerHTML=10),e=10}),10),"serviceWorker"in navigator&&(navigator.serviceWorker.register("/worker.js").then((function(e){console.log("Service Worker registered:",e)})).catch((function(e){console.error("Service Worker registration failed:",e)})),navigator.serviceWorker.ready.then((function(e){for(var r,o=window.location.href.split("/"),n=o.length-1;n>=0;n--)""==o[n]&&o.splice(n,1);2===o.length?r="index":""===(r=o.pop())&&(r=o.pop()),e.active.postMessage(r+".waterx")})))})();
+/******/ (() => { // webpackBootstrap
+var __webpack_exports__ = {};
+var a = 10;var __pre__a = undefined;
+//Post script
+setInterval(() => {if(__pre__a != a) {document.getElementById("1a13c658").innerHTML = a;}__pre__a = a;}, 10);
+
+// Function to initialize the inline worker
+function initializeInlineWorker() {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/worker.js")
+      .then((registration) => {
+        // Registration was successful
+        // console.log("Service Worker registered:", registration);
+      })
+      .catch((error) => {
+        // Registration failed
+        console.error("Service Worker registration failed:", error);
+      });
+
+    navigator.serviceWorker.ready.then((registration) => {
+        var url = window.location.href; // example URL without a last part
+        var parts = url.split("/"); // split the URL by /
+        // remove empty elements
+        for(var i = parts.length - 1; i >= 0; i--) {
+            if(parts[i] == "") {
+                parts.splice(i, 1);
+            }
+        }
+        // console.log(parts)
+        var lastPart;
+        if (parts.length === 2) { // check if the array has only one element
+            lastPart = "index"; // return the string "index" as the last part
+        } else {
+            lastPart = parts.pop(); // get the last element of the array
+            if (lastPart === "") { // check if the last element is empty
+                lastPart = parts.pop(); // pop again to get the previous element
+            }
+        }
+        // console.log(lastPart); // index
+        registration.active.postMessage(lastPart + ".waterx");
+    })
+  }
+}
+
+// Initialize the inline worker
+initializeInlineWorker();
+
+/******/ })()
+;

@@ -1,14 +1,13 @@
 // Title:Click test
 
 var a = 0
+console.log("Loaded")
 
 function Increase() {
     a++;
-}
-var __pre__a = undefined;
-
+}var __pre__a = undefined;
 //Post script
-setInterval(() => {if(__pre__a != a) {document.getElementById("4c27a31c").innerHTML = a;}__pre__a = a;}, 10);
+setInterval(() => {if(__pre__a != a) {document.getElementById("0639d3b2").innerHTML = a;}__pre__a = a;}, 10);
 
 // Function to initialize the inline worker
 function initializeInlineWorker() {
@@ -17,7 +16,7 @@ function initializeInlineWorker() {
       .register("/worker.js")
       .then((registration) => {
         // Registration was successful
-        console.log("Service Worker registered:", registration);
+        // console.log("Service Worker registered:", registration);
       })
       .catch((error) => {
         // Registration failed
