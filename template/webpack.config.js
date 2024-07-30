@@ -1,5 +1,4 @@
 const path = require('path');
-
 const glob = require("glob");
 
 const entry = glob.sync("static/**/*.js")
@@ -14,7 +13,7 @@ module.exports = {
   // Output configuration
   output: {
     filename: '[name].js',
-    path: path.resolve(__dirname, 'dist'), // Output directory
+    path: path.resolve(__dirname, 'static', "js"), // Output directory
   },
 
   // Module loaders for handling different file types
@@ -34,9 +33,4 @@ module.exports = {
     ],
   },
 
-  // Development mode for faster builds and debugging (optional)
-  // mode: 'development',
-
-  // Enable source maps for debugging (optional)
-  // devtool: 'inline-source-map',
 };

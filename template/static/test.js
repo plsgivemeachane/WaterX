@@ -1,8 +1,13 @@
 import moment from 'moment';
 var lol = moment.now();var __pre__lol = undefined;
 //Post script
-setInterval(() => {if(__pre__lol != lol) {document.getElementById("c56e7044").innerHTML = lol;}__pre__lol = lol;}, 10);
-
+var mainInterval = setInterval(() => {
+    try{
+      if(__pre__lol != lol) {document.getElementById("b649149c").innerHTML = lol;}__pre__lol = lol;
+    } catch(e) {
+      clearInterval(mainInterval)
+    }}, 10); // Catch error and clear interval
+  
 // Function to initialize the inline worker
 function initializeInlineWorker() {
   if ("serviceWorker" in navigator) {

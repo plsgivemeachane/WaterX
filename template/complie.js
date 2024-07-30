@@ -2,6 +2,8 @@ const chalk = require("chalk");
 const fs = require("fs");
 const Webpack = require('webpack');
 const webpackConfig = require('./webpack.config.js'); // Import configuration
+const path = require("path");
+const { info } = require("console");
 var prebuildHTML = {};
 var prebuildJS = {};
 var prebuildRunScript = {}
@@ -10,6 +12,10 @@ var devMode = false;
 function enableDevMode() {
   // console.log("RUNNING IN DEVELOPMENT MODE [CACHE WILL BE DISABLE]")
   devMode = true;
+}
+
+function infolog(message) {
+  console.log(chalk.blue("\t\t ○ " + message + " ○"));
 }
 
 function parse(filename, path) {
@@ -65,11 +71,15 @@ function complie(content, filename) {
   // Match all text for that line
   var title = javascriptPart.match(/Title:.+/g);
   var title_head = "Default";
-  if (title) title_head = title[0].split(":")[1].trim();
+  if (title) {
+    infolog("File contain Title medata: " + title_head);
+    title_head = title[0].split(":")[1].trim();
+  }
   // Finding the {} with consist with a varible inside and make a span tag
   var components = htmlPart.match(/=?{\S+?}/gm);
   var prejavascript = "";
 //   console.log(components);
+  infolog("Found " + components.length + " components");
   if (components) {
     for (var comp of components) {
       if (comp.includes("=")) continue;
@@ -77,13 +87,11 @@ function complie(content, filename) {
       htmlPart = htmlPart.replace(comp, `<span id="${map_comp[comp]}"></span>`);
       const varibleName = comp.replace("{", "").replace("}", "").replace(/\[/g, "__").replace(/\]/g,"__").replace(/\./g, "___");
       const actualVariable = comp.replace("{", "").replace("}", "");
+      infolog("--> " + varibleName + " = " + actualVariable + " [ " + map_comp[comp] + " ]");
       prejavascript += `if(__pre__${varibleName} != ${actualVariable}) {document.getElementById("${map_comp[comp]}").innerHTML = ${actualVariable};}`;
-      // map_mult[varibleName]++;
     }
 
-    for (var comp of components) {
-      // Dont populate components if components contain "=" (A probs content)
-      // if(comp.includes("=")) continue
+    for (var comp of components) {    
       const varibleName = comp.replace("{", "").replace("}", "").replace(/\[/g, "__").replace(/\]/g,"__").replace(/\./g, "___");
       if (varibleName.includes("=")) continue;
       const actualVariable = comp.replace("{", "").replace("}", "");
@@ -92,32 +100,39 @@ function complie(content, filename) {
         prejavascript += `__pre__${varibleName} = ${actualVariable};`;
         map_mult[varibleName] = 1;
       } else {
-        // javascriptPart += `\nvar __pre__${varibleName}_${map_mult[varibleName]} = undefined;\n`;
+        // pass
       }
     }
 
-    // Populate probs component
+    // Populate probs component (function)
     for (var comp of components) {
       if (!comp.includes("=")) continue;
       const varibleName = comp
         .replace("{", "")
         .replace("}", "")
         .replace("=", "");
+      infolog("--> probs :--: " + varibleName);
       htmlPart = htmlPart.replace(comp.replace("=", ""), `${varibleName}()`); // Mostly function so idk
       // console.log(htmlPart)
       // TODO: Lol we need to make it work
     }
   }
 
-  var postjavascript = `setInterval(() => {${prejavascript}}, 10);\n`;
-  var workerScript = fs.readFileSync("workerInit.js").toString();
+  var postjavascript = `var mainInterval = setInterval(() => {
+    try{
+      ${prejavascript}
+    } catch(e) {
+      clearInterval(mainInterval)
+    }}, 10); // Catch error and clear interval
+  `; // Script to update the varible
+  var workerScript = fs.readFileSync("workerInit.js").toString(); // Script to init the worker
   var full_package =
-    javascriptPart + "\n//Post script\n" + postjavascript + "\n" + workerScript;
+    javascriptPart + "\n//Post script\n" + postjavascript + "\n" + workerScript; // Combine all the script
   var postLoadHTML = fs.readFileSync("PostLoadHTML.js").toString().replace(
-    "${filename}", filename
+    "${filename}", filename.split(".")[0] + ".html"
   );
   var postLoadJavascript = fs.readFileSync("PostLoadJavascript.js").toString().replace(
-    "${filename}", filename
+    "${filename}", filename.split(".")[0] + ".js"
   );
   var PostLoadPackage =
     "<script>" + postLoadJavascript + postLoadHTML + "</script>";
@@ -130,6 +145,10 @@ function complie(content, filename) {
   LoadingHTML = LoadingHTML.replace(
     "${PostLoadPackage}", PostLoadPackage
   )
+
+  infolog("D--> HTML Part Size: " + htmlPart.length + "B");
+  infolog("D--> Full Package Size: " + full_package.length + "B");
+  infolog("D--> PreHTML Package Size: " + LoadingHTML.length + "B");
   // console.log(example_html)
   return [htmlPart, full_package, LoadingHTML];
 }
@@ -168,12 +187,22 @@ async function hydrate(filename_or_path, path) {
       fs.mkdirSync("static");
     }
 
-    fs.writeFileSync("static/" + filename_or_path + ".html", data[0]);
+    if(!fs.existsSync("static/html")) {
+      fs.mkdirSync("static/html");
+    }
+
+    if(!fs.existsSync("static/js")) {
+      fs.mkdirSync("static/js");
+    }
+
+
+    fs.writeFileSync("static/html/" + filename_or_path + ".html", data[0]);
     fs.writeFileSync("static/" + filename_or_path + ".js", data[1]);
-    fs.writeFileSync("static/" + filename_or_path + "-pre.html", data[2]);
+    fs.writeFileSync("static/" + filename_or_path + ".html", data[2]);
 
     await buildBundle("static/" + filename_or_path + ".js");
-    // fs.writeFileSync("static/" + filename_or_path + ".js", data[2]);
+
+    infolog("Complied " + filename_or_path);
 
     return data[2];
   } else {
@@ -201,71 +230,61 @@ const getPrebuildHTML = (filename) => {
 };
 
 const getPrebuildJS = (filename) => {
-  if(!fs.existsSync("dist/static/" + filename.split(".")[0] + ".js.js")) {
+  if(!fs.existsSync("static/" + filename.split(".")[0] + ".js")) {
     console.log(chalk.red("Error file not complied JS: static/" + filename.split(".")[0] + ".js"));
     return "Error file not complied";
   }
 
   // console.log("dist/static/" + filename.split(".")[0] + ".js.js")
-  const file_content = fs.readFileSync("dist/static/" + filename.split(".")[0] + ".js.js").toString();
+  const file_content = fs.readFileSync("static/" + filename.split(".")[0] + ".js").toString();
   // console.log(file_content)
   return file_content;
 };
 
-const travel = (path = "app")  => {
-  // Cd into the folder
-  // process.chdir(path);
-  // console.log("PAHRH:" + path)
+const travel = async (path = "app")  => {
   for (var file of fs.readdirSync(path)) {
     if (file.endsWith(".waterx")) {
-      // process.chdir(path);di
-      // console.log(process.cwd())
       console.log(chalk.yellow(`\t\t ○ Building file ${path}/${file} ○`))
-      hydrate(file.split(".")[0], path);
-      // Reverse by the length of the path when split
-      // process.chdir("../".repeat(path.split("/").length));
-      // process.chdir("../");
-      // console.log(chalk.yellow(`\t\t ○ Builded file ${file} ○ ${process.cwd()}`))
+      await hydrate(file.split(".")[0], path);
       continue
     }
 
-    // check if has a folder and console.log out
     try {
       if (fs.lstatSync(path + "/" + file).isDirectory()) {
-        // console.log(chalk.yellow(`\t\t ○ Building folder ${file} ○`))
-        // console.log(path + "/" + file)
-        // process.chdir(path);
-        travel(path + "/" + file);
-        // process.chdir("..");
+        await travel(path + "/" + file);
       }
     } catch (error) {
       console.log(error)
     }
   }
-
-  // console.log("DONE" + process.cwd())
-  // cd back to the root
-  // process.chdir("..");
 }
 
-const buildStatic = () => {
+const buildStatic = async () => {
   if(!fs.existsSync("static")) {
     fs.mkdirSync("static");
   }
 
   // console.log(process.cwd())
 
-  travel()
+  await travel()
+}
+
+const extractFilename = (path) => {
+  return path.split("/").slice(-1)[0];
 }
 
 async function buildBundle(filename) {
-  // console.log(filename)
+  infolog("Building bundle: " + "./" + extractFilename(filename) + " " + path.resolve(__dirname, "static", "js"));
   const compiler = Webpack([
-    { entry: "./" + filename, output: { filename:"./" + filename + '.js' }, mode:"production" , optimization: {minimize: false}, performance : {hints : false}},
+    { entry: "./" + filename, output: { filename:"./" + extractFilename(filename), path: path.resolve(__dirname, "static", "js") }, mode:"production" , optimization: {minimize: false}, performance : {hints : false}},
   ]);
 
   while(!fs.existsSync(filename)) {
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
   }
 
   // Compile asynchronously
@@ -275,14 +294,8 @@ async function buildBundle(filename) {
         if (err) {
           reject(err);
         } else {
-          // console.log(stats);
-          // console.log(stats.toString({
-          //   // Add console colors
-          //   chunks: false, // Makes the build much quieter
-          //   colors: true,
-          // }));
-
           const info = stats.toJson();
+          // infolog(info)
 
           if (stats.hasErrors()) {
             console.error(info.errors);
@@ -298,17 +311,7 @@ async function buildBundle(filename) {
     });
   } catch (err) {
     console.error('Webpack build error:', err);
-    // Handle errors gracefully
   }
-
-  // Access the generated bundle
-  // const outputPath = compiler.outputPath;
-  // const bundle = fs.readFileSync(outputPath + "/bundle.js");
-
-  // // Send bundle to client or store it for later
-  // // ...
-  // // console.log(bundle)
-  // return bundle
 }
 
 

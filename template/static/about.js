@@ -1,7 +1,12 @@
 var a = 10;var __pre__a = undefined;
 //Post script
-setInterval(() => {if(__pre__a != a) {document.getElementById("1a13c658").innerHTML = a;}__pre__a = a;}, 10);
-
+var mainInterval = setInterval(() => {
+    try{
+      if(__pre__a != a) {document.getElementById("ed1960b7").innerHTML = a;}__pre__a = a;
+    } catch(e) {
+      clearInterval(mainInterval)
+    }}, 10); // Catch error and clear interval
+  
 // Function to initialize the inline worker
 function initializeInlineWorker() {
   if ("serviceWorker" in navigator) {

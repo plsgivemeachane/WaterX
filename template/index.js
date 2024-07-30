@@ -7,13 +7,23 @@ const {
   enableDevMode,
   buildStatic,
 } = require("./complie");
-const app = express();
+
 const chalk = require ("chalk")
-// Get the command line arguments
 const commandLineArgs = process.argv.slice(2);
 if(commandLineArgs[0] == "--dev") {
   console.log(chalk.blue("\t\t ○ Running in development mode ○\n"))
   enableDevMode()
+} else if(commandLineArgs[0] == "--build") {
+  console.log(chalk.blue("\t\t ○ Building static files... ○\n"))
+  enableDevMode()
+  const buildtime = async() => {
+    await buildStatic()
+
+    console.log(chalk.blue("\t\t ○ Building Complete Successfully ○\n"))
+
+    process.exit(0);
+  }
+  buildtime()
 } else {
   console.log(chalk.blue("\t\t ○ Running in production mode ○\n"))
   console.log(chalk.blue("\t\t ○ Building static files... ○\n"))
@@ -21,7 +31,11 @@ if(commandLineArgs[0] == "--dev") {
   buildStatic()
 }
 
+const app = express();
+// Get the command line arguments
+
 app.use(express.static("public"));
+app.use(express.static("static"));
 
 app.get("/", async (req, res) => {
   res.send(await hydrate("index", "app"));
@@ -33,7 +47,7 @@ app.get(/.+/, async (req, res, next) => {
 
     return;
   }
-  // res.send(req.url)
+
   if (!fs.existsSync("app/" + req.url + ".waterx")) {
     res.status(404).send("File not found");
     return;
@@ -53,27 +67,17 @@ app.get(/.+/, async (req, res, next) => {
   res.send(hydrate(req.url, "app"));
 })
 
-// app.get("/:id", (req, res) => {
-//   const id = req.params.id;
-//   // Check if the file exists
-//   if (!fs.existsSync("app/" + id + ".waterx")) {
-//     res.status(404).send("File not found");
-//     return;
-//   }
-//   res.send(hydrate(id));
+// app.get("/html/:id", (req, res) => {
+//   res.send({
+//     html: getPrebuildHTML(req.params.id),
+//   });
 // });
 
-app.get("/html/:id", (req, res) => {
-  res.send({
-    html: getPrebuildHTML(req.params.id),
-  });
-});
-
-app.get("/js/:id", (req, res) => {
-  res.send({
-    js: getPrebuildJS(req.params.id),
-  });
-});
+// app.get("/js/:id", (req, res) => {
+//   res.send({
+//     js: getPrebuildJS(req.params.id),
+//   });
+// });
 
 app.get(/.*\.css/, (req, res) => {
   const path = req.url.split("/").slice(0, -1).join("/");

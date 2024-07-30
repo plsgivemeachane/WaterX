@@ -7,8 +7,13 @@ function Increase() {
     a++;
 }var __pre__a = undefined;
 //Post script
-setInterval(() => {if(__pre__a != a) {document.getElementById("0639d3b2").innerHTML = a;}__pre__a = a;}, 10);
-
+var mainInterval = setInterval(() => {
+    try{
+      if(__pre__a != a) {document.getElementById("bf8a25ee").innerHTML = a;}__pre__a = a;
+    } catch(e) {
+      clearInterval(mainInterval)
+    }}, 10); // Catch error and clear interval
+  
 // Function to initialize the inline worker
 function initializeInlineWorker() {
   if ("serviceWorker" in navigator) {
